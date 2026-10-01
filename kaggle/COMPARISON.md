@@ -122,7 +122,7 @@ Notes
 
 | | dfranzen | lordhansolo | sirikilohit |
 |---|---|---|---|
-| Linear-attention backend | flashinfer | flashinfer prefill, triton decode | flashinfer |
+| Linear-attention backend | [flashinfer](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/dfranzen/arc-agi-3-milestone-2-solution.ipynb?plain=1#L10703) | flashinfer prefill (auto), triton [decode](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/lordhansolo/dataset-taaf-kaggle-source/src/ARC3-Inference/configs/inference.json#L46) | [flashinfer](https://github.com/LohitSiriki/arc-agi-3-milestone2-solution/blob/af105202327dcf35bd670a50b2558adab12e8dd3/cells/11_4_import_the_bundled_source_and_boot_sglang.py#L186) |
 | MoE backend | auto (Marlin for W4A16) | auto (flashinfer_cutlass for NVFP4) | auto (Marlin for W4A16), draft on flashinfer_cutlass |
 | Reasoning kept in history | reasoning_content | preserve_thinking, xhigh | reasoning_content |
 | Temperature | 0.7 | 0.6 | 0.6 |
