@@ -1,0 +1,456 @@
+{
+  "artifact": "arc3_vllm_main_e975732_arc3_overlay.tar.blob",
+  "applier": "apply_vllm_main_e975732_arc3.py",
+  "target": "vllm/models/qwen4_exp/nvidia/model.py",
+  "stock_target_sha256": "bdc0ea930dadc02328c2bee0b4c9cad048b989612cc76906829728668dcde138",
+  "patched_target_sha256": "2e03b2faa3eacf7bd6cb5b1a081240b7efc586d5eac87144104fc8aea1168dad",
+  "overlay_sha256": "e3a6fe0d9f010bc1fb66e53e7dc6fde43272824d5200da5a49b5c4456065e0cb",
+  "vllm_commit": "e9757321527ca1ecd514c07c1418dd2c53da3d19",
+  "image": "vllm/vllm-openai:nightly-e9757321527ca1ecd514c07c1418dd2c53da3d19",
+  "amd64_manifest_digest": "sha256:e0eee5c5506bea9bfe350f7d99b07dc49e37d42647a128c2a57ff184551fba10",
+  "model_target": "lordhansolo/qwen3-8-flash-next-mixed-nvfp4-fp8/PyTorch/hf-mixed-mtp-nvfp4/1",
+  "upstream_model": "primitive-ai/Qwen3.8-Flash-Next-mixed-NVFP4-FP8@07915ee79ec217c117e8a57bf2557a4a1418c10f",
+  "ports": [
+    {
+      "feature": "accepted-token and state-index bounds hardening",
+      "source": "vllm#50021",
+      "commit": "79a2cb27b4ecf2d1f735e54260cf1729436a79e2",
+      "status": "exact current PR-head runtime changes"
+    },
+    {
+      "feature": "accepted-token D2H synchronization before batch row moves",
+      "source": "vllm#53919",
+      "commit": "d172b7f5ddc52c05cf58c26227d164756544fac1",
+      "status": "PR-head runtime fix without its two explanatory comments"
+    },
+    {
+      "feature": "PLE prefetch ids kept out of the CUDA graph pool",
+      "source": "vllm#58489",
+      "commit": "48d8880d098c567c64150203110b6a6a4221d44f",
+      "status": "exact upstream runtime change"
+    },
+    {
+      "feature": "QSA key views no longer hold the profiling KV cache",
+      "source": "vllm#58961",
+      "commit": "a2be4d3cc7b978a6720dab32d28ae310775acb16",
+      "status": "exact upstream runtime change"
+    },
+    {
+      "feature": "allocator max_split_size_mb 20 during profile_run, settings restored",
+      "source": "vllm#58430",
+      "commit": "6491f481a7c0fb3aa77bbc6649584b545c65c871",
+      "status": "exact upstream runtime change"
+    },
+    {
+      "feature": "PLE short-conv metadata without causal-conv1d metadata or a GPU sync",
+      "source": "vllm#58114",
+      "commit": "20b52e9f5b5793d56586b91df9b93cbe30a24040",
+      "status": "exact upstream runtime change"
+    },
+    {
+      "feature": "padded one-token prompt tails build as spec-decode rows for GDN",
+      "source": "vllm#58434",
+      "commit": "7dbd0a8d22d20eb938994ad7a9158e02f30c9ce6",
+      "status": "exact upstream runtime change"
+    },
+    {
+      "feature": "draft slots padded onto a prefill step are rejected",
+      "source": "vllm#58784",
+      "commit": "fedbc3b564102efb38f3697acb69920c3ac912be",
+      "status": "exact upstream runtime change"
+    },
+    {
+      "feature": "expert mapping indexed by expert id in load_weights",
+      "source": "vllm#58720",
+      "commit": "ad6817b68d9b1d138eca2033cf90233bd0100bf3",
+      "status": "exact upstream runtime change"
+    }
+  ],
+  "custom_fixes": [
+    {
+      "feature": "Mamba read-side EAGLE drop",
+      "sources": [
+        "vllm#48375",
+        "vllm#53912",
+        "vllm#54173"
+      ],
+      "status": "reuses an equal joint replay boundary once, but drops from a shorter actual coarse/fine Mamba hit"
+    },
+    {
+      "feature": "Mooncake Mamba/EAGLE boundary reconciliation",
+      "sources": [
+        "vllm#48375",
+        "vllm#53912"
+      ],
+      "status": "mirrors the corrected core single-drop contract"
+    },
+    {
+      "feature": "mixed compressed-tensors PLE safeguard",
+      "status": "keeps BF16 PLE unquantized despite an FP8 PLE dtype hint"
+    },
+    {
+      "feature": "Mamba resume-state block divisor",
+      "sources": [
+        "vllm#53142",
+        "vllm#54173"
+      ],
+      "status": "uses mamba_block_size, with attention block size only as fallback"
+    },
+    {
+      "feature": "Qwen4Exp MTP checkpoint weight prefilter",
+      "sources": [
+        "lordhansolo/qwen3-8-flash-next-mixed-nvfp4-fp8/PyTorch/hf-mixed-mtp-nvfp4/1 model.safetensors.index.json",
+        "Kaggle run 20260914_120200_d7a79ea"
+      ],
+      "status": "selects 6175 draft, quantization, embedding and LM-head weights in 4/97 shards (5.59/167.74 GiB) before safetensors loading"
+    },
+    {
+      "feature": "Qwen4Exp MTP pruned draft vocabulary",
+      "status": "opt-in through VLLM_QWEN4_EXP_DRAFT_VOCAB with speculative_config.use_local_argmax_reduction; greedy drafts use a 64-row-aligned copy of the LM-head rows for the listed token ids, while verification keeps the full target head"
+    },
+    {
+      "feature": "Mamba align state retention for multi-turn prefix reuse",
+      "status": "with EAGLE and fine-grained hits the last aligned position before the prompt end is a retained replay boundary; a request keeps its newest cached state block referenced until it finishes instead of freeing it right after prefill"
+    },
+    {
+      "feature": "Mamba align prompt-tail state for multi-turn prefix reuse",
+      "status": "the partial-tail state is registered one hash unit below the prompt's last hash boundary whenever the scheduler drops the EAGLE block, also when only the attention group is flagged as EAGLE; the request holds its copy until it finishes in place of the retained boundary state"
+    },
+    {
+      "feature": "Qwen4Exp PLE/GDN cache grouping on one TP/CP rank",
+      "status": "block-outermost packing normalizes the PLE short-conv replication marker only for Qwen4Exp with TP=1, both CP sizes equal to 1 and no KV transfer connector; compatible PLE/GDN states share block IDs while keeping their per-layer shapes, dtypes, backends and padding"
+    },
+    {
+      "feature": "Qwen4Exp input embedding in pinned host memory",
+      "status": "opt-in through embed_tokens in --cpu-offload-params, outside the --cpu-offload-gb budget; the table is allocated pinned on the host, skips the post-load device round trip that would orphan its UVA view, and a Triton kernel copies only the requested rows, bit-identical to the device table; the MTP drafter shares the same module"
+    },
+    {
+      "feature": "Qwen4Exp SM120 small BF16 GEMMs at target M40/M44",
+      "status": "default enabled; VLLM_ARC3_SM120_GEMM=0 restores rc1 dispatch before startup; TP/CP/PP=1; selected unquantized contiguous BF16 projections only; no weight copies"
+    },
+    {
+      "feature": "Qwen4Exp MTP3 c11 exact CUDA graph capture at 44 tokens",
+      "status": "append M44 when capture capacity permits; retained for GEMM on/off so A/B uses the same graph sizes"
+    },
+    {
+      "feature": "Qwen4Exp SM120 small BF16 GEMMs extended to target M48/M56/M64",
+      "status": "same seven rc2 plans; padded MTP3 decode rows of c=11-16; VLLM_ARC3_SM120_GEMM=0 still restores rc1 dispatch before startup"
+    },
+    {
+      "feature": "Qwen4Exp GDN RecoverSSM for MTP verification",
+      "status": "off by default; VLLM_ARC3_GDN_RECOVERSSM=1 before startup verifies GDN windows from the running state without per-draft blocks, records FP32 corrections, normalized keys and gates per speculative row, and after sampling replays the accepted prefix into the running block and the crossed align checkpoint; GDN and PLE groups allocate no per-draft blocks; requires Model Runner V2, align or none cache mode, one rank, Triton GDN decode"
+    },
+    {
+      "feature": "Qwen4Exp MTP3 C14 exact CUDA graphs at 44 and 52 tokens",
+      "status": "add M44 and M52 when C14, TP1 and capture ceiling is at least 56"
+    },
+    {
+      "feature": "Qwen4Exp SM120 GEMM at the exact C14 M52 decode row",
+      "status": "rc3 per-projection plans also serve M52; other rows unchanged"
+    }
+  ],
+  "already_upstream": [
+    {
+      "feature": "UVA PLE offload",
+      "source": "vllm#54371"
+    },
+    {
+      "feature": "fine-grained Mamba/EAGLE checkpoints",
+      "source": "vllm#53945"
+    },
+    {
+      "feature": "both EAGLE replay boundaries",
+      "source": "vllm#54713"
+    },
+    {
+      "feature": "NULL-gap retirement",
+      "source": "vllm#55450"
+    },
+    {
+      "feature": "overlap-safe Mamba state copies",
+      "source": "vllm#50729"
+    },
+    {
+      "feature": "FP8 QSA cache on NVIDIA SM120",
+      "source": "vllm#55557",
+      "commit": "dff1bde84dd6e34a49c150116d0f212507280910"
+    },
+    {
+      "feature": "positional MTP draft KV-group annotation on the hybrid grouping path",
+      "source": "vllm#55390",
+      "commit": "0bce411a073e0da2c9bded9bb6ced1cbee51c564"
+    }
+  ],
+  "overlay_files": [
+    {
+      "target": "vllm/config/vllm.py",
+      "stock_sha256": "8994d425005bf2f42210da5f12ad730d87661351e65fef483cedbc84d0157437",
+      "rc1_sha256": "8994d425005bf2f42210da5f12ad730d87661351e65fef483cedbc84d0157437",
+      "rc2_sha256": "57b41ef2b1f12ff19ebeb83b0bbba31f1fc90f40a22a4fc9ab8261995445d714",
+      "rc3_sha256": "57b41ef2b1f12ff19ebeb83b0bbba31f1fc90f40a22a4fc9ab8261995445d714",
+      "sha256": "d2f5e9b9e3a9af2be2e97d37bfd5b88f206f3541082e64a6dff4e229cde7c2d3",
+      "gdn_sha256": "8fa62f6f105a56be1391ada3e8601422dd1fdb7b0d9d69b1dfea3181dff9069b"
+    },
+    {
+      "target": "vllm/distributed/kv_transfer/kv_connector/v1/mooncake/store/coordinator.py",
+      "stock_sha256": "a8eb6c2157a96e8d25233b82347ac8409a41d6390b4f2c64242119c05911010c",
+      "rc1_sha256": "f6d05630e436fb0b2f85601c9970a4e95a7872d94e38ef128811021240332be2",
+      "rc2_sha256": "f6d05630e436fb0b2f85601c9970a4e95a7872d94e38ef128811021240332be2",
+      "rc3_sha256": "f6d05630e436fb0b2f85601c9970a4e95a7872d94e38ef128811021240332be2",
+      "sha256": "f6d05630e436fb0b2f85601c9970a4e95a7872d94e38ef128811021240332be2",
+      "gdn_sha256": "f6d05630e436fb0b2f85601c9970a4e95a7872d94e38ef128811021240332be2"
+    },
+    {
+      "target": "vllm/envs.py",
+      "stock_sha256": "ee49857737630a6c29003f18ea6af7563a50f59db935bd07c6fb4476140cd819",
+      "rc1_sha256": "fd42834c6488a41e1b820b3e157fdd3ccc3e4029ae9f73eb2fb5cbe1478d3b24",
+      "rc2_sha256": "fd42834c6488a41e1b820b3e157fdd3ccc3e4029ae9f73eb2fb5cbe1478d3b24",
+      "rc3_sha256": "fd42834c6488a41e1b820b3e157fdd3ccc3e4029ae9f73eb2fb5cbe1478d3b24",
+      "sha256": "fd42834c6488a41e1b820b3e157fdd3ccc3e4029ae9f73eb2fb5cbe1478d3b24",
+      "gdn_sha256": "fd42834c6488a41e1b820b3e157fdd3ccc3e4029ae9f73eb2fb5cbe1478d3b24"
+    },
+    {
+      "target": "vllm/model_executor/layers/mamba/abstract.py",
+      "stock_sha256": "3fb7face79dcb6a985c4b19c3b228c1bc1c1ea6104c5363066a2251758b7e463",
+      "rc1_sha256": "3fb7face79dcb6a985c4b19c3b228c1bc1c1ea6104c5363066a2251758b7e463",
+      "rc2_sha256": "3fb7face79dcb6a985c4b19c3b228c1bc1c1ea6104c5363066a2251758b7e463",
+      "rc3_sha256": "3fb7face79dcb6a985c4b19c3b228c1bc1c1ea6104c5363066a2251758b7e463",
+      "sha256": "802337b10997ef81f170f1b3c08a15fb82baa81a668819710905ac77ecbc223d",
+      "gdn_sha256": "802337b10997ef81f170f1b3c08a15fb82baa81a668819710905ac77ecbc223d"
+    },
+    {
+      "target": "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py",
+      "stock_sha256": "414ca151c157edf0e486097b3cf6cb6fbbbca54e024e291edcb5ccb885968d45",
+      "rc1_sha256": "414ca151c157edf0e486097b3cf6cb6fbbbca54e024e291edcb5ccb885968d45",
+      "rc2_sha256": "414ca151c157edf0e486097b3cf6cb6fbbbca54e024e291edcb5ccb885968d45",
+      "rc3_sha256": "414ca151c157edf0e486097b3cf6cb6fbbbca54e024e291edcb5ccb885968d45",
+      "sha256": "c8a3e2a9fcf84ea747c0e29f43d6fd52e52eb9edc26860bc1f86111618b26bae",
+      "gdn_sha256": "c8a3e2a9fcf84ea747c0e29f43d6fd52e52eb9edc26860bc1f86111618b26bae"
+    },
+    {
+      "target": "vllm/model_executor/layers/mamba/ops/arc3_gdn_recoverssm.py",
+      "stock_sha256": null,
+      "rc1_sha256": null,
+      "rc2_sha256": null,
+      "rc3_sha256": null,
+      "sha256": "31a305677c8bca5b0380de608848d13b5c2313c8133506555afa368f385b72b9",
+      "gdn_sha256": "31a305677c8bca5b0380de608848d13b5c2313c8133506555afa368f385b72b9"
+    },
+    {
+      "target": "vllm/model_executor/layers/mamba/ops/causal_conv1d.py",
+      "stock_sha256": "cb16cc9250c4195c09d6d83b43bba607c2d749b621d8d135a920443d1577265f",
+      "rc1_sha256": "f8ac0c85683d99ee86157f45be3629b1985f9d7eeba5e2d17756bdd2f549c977",
+      "rc2_sha256": "f8ac0c85683d99ee86157f45be3629b1985f9d7eeba5e2d17756bdd2f549c977",
+      "rc3_sha256": "f8ac0c85683d99ee86157f45be3629b1985f9d7eeba5e2d17756bdd2f549c977",
+      "sha256": "f8ac0c85683d99ee86157f45be3629b1985f9d7eeba5e2d17756bdd2f549c977",
+      "gdn_sha256": "f8ac0c85683d99ee86157f45be3629b1985f9d7eeba5e2d17756bdd2f549c977"
+    },
+    {
+      "target": "vllm/model_executor/layers/mamba/ops/mamba_ssm.py",
+      "stock_sha256": "6e765aa767e621cbb79635cf1e9a18e1501e76048685b5e36a75c3ca933cc608",
+      "rc1_sha256": "f1a0b8362846430b578304f690926e09484220045d6a2823d6faf246e337fa03",
+      "rc2_sha256": "f1a0b8362846430b578304f690926e09484220045d6a2823d6faf246e337fa03",
+      "rc3_sha256": "f1a0b8362846430b578304f690926e09484220045d6a2823d6faf246e337fa03",
+      "sha256": "f1a0b8362846430b578304f690926e09484220045d6a2823d6faf246e337fa03",
+      "gdn_sha256": "f1a0b8362846430b578304f690926e09484220045d6a2823d6faf246e337fa03"
+    },
+    {
+      "target": "vllm/model_executor/model_loader/default_loader.py",
+      "stock_sha256": "9c9d54b1b650bf5affc924ebb8b8c73711e187ae7486cadd9f737bb1279cc7b8",
+      "rc1_sha256": "445bd6d61f8f6e8ab3d30cc64175d7b1530d663d2bf9986d5944d1b3a4c6f16a",
+      "rc2_sha256": "445bd6d61f8f6e8ab3d30cc64175d7b1530d663d2bf9986d5944d1b3a4c6f16a",
+      "rc3_sha256": "445bd6d61f8f6e8ab3d30cc64175d7b1530d663d2bf9986d5944d1b3a4c6f16a",
+      "sha256": "445bd6d61f8f6e8ab3d30cc64175d7b1530d663d2bf9986d5944d1b3a4c6f16a",
+      "gdn_sha256": "445bd6d61f8f6e8ab3d30cc64175d7b1530d663d2bf9986d5944d1b3a4c6f16a"
+    },
+    {
+      "target": "vllm/model_executor/model_loader/weight_utils.py",
+      "stock_sha256": "9be629052a17d174084c69e3fba80c2f60b428e6a6dd2820fd9960b9bf5fc6c3",
+      "rc1_sha256": "56aadf3aa2dc72a26cac02c1df7859e6bd12ebd9e6a4d83ee0530168d84eb33c",
+      "rc2_sha256": "56aadf3aa2dc72a26cac02c1df7859e6bd12ebd9e6a4d83ee0530168d84eb33c",
+      "rc3_sha256": "56aadf3aa2dc72a26cac02c1df7859e6bd12ebd9e6a4d83ee0530168d84eb33c",
+      "sha256": "56aadf3aa2dc72a26cac02c1df7859e6bd12ebd9e6a4d83ee0530168d84eb33c",
+      "gdn_sha256": "56aadf3aa2dc72a26cac02c1df7859e6bd12ebd9e6a4d83ee0530168d84eb33c"
+    },
+    {
+      "target": "vllm/models/kimi_k3/amd/ops/third_party/kda/fused_recurrent.py",
+      "stock_sha256": "205d07072a2667c6f5ac4baf88c718135dce5de300fa558a1b03b3352b4b3e25",
+      "rc1_sha256": "4cf390f1bf35dd9ef535044bd0518b14128b3c4ed204d45a13f78af49469d1ea",
+      "rc2_sha256": "4cf390f1bf35dd9ef535044bd0518b14128b3c4ed204d45a13f78af49469d1ea",
+      "rc3_sha256": "4cf390f1bf35dd9ef535044bd0518b14128b3c4ed204d45a13f78af49469d1ea",
+      "sha256": "4cf390f1bf35dd9ef535044bd0518b14128b3c4ed204d45a13f78af49469d1ea",
+      "gdn_sha256": "4cf390f1bf35dd9ef535044bd0518b14128b3c4ed204d45a13f78af49469d1ea"
+    },
+    {
+      "target": "vllm/models/kimi_k3/nvidia/ops/third_party/kda/fused_recurrent.py",
+      "stock_sha256": "b94860d4af018237f7316fe807c53ab3ab2d50e268e6b1e707d9e170f40aa214",
+      "rc1_sha256": "91ca0c1fb82e95cd3c03780ef6462028ea3b4f34f331a5f7e5d163a71ea8b1b5",
+      "rc2_sha256": "91ca0c1fb82e95cd3c03780ef6462028ea3b4f34f331a5f7e5d163a71ea8b1b5",
+      "rc3_sha256": "91ca0c1fb82e95cd3c03780ef6462028ea3b4f34f331a5f7e5d163a71ea8b1b5",
+      "sha256": "91ca0c1fb82e95cd3c03780ef6462028ea3b4f34f331a5f7e5d163a71ea8b1b5",
+      "gdn_sha256": "91ca0c1fb82e95cd3c03780ef6462028ea3b4f34f331a5f7e5d163a71ea8b1b5"
+    },
+    {
+      "target": "vllm/models/qwen4_exp/nvidia/arc3_sm120_gemm.py",
+      "stock_sha256": null,
+      "rc1_sha256": null,
+      "rc2_sha256": "4f40a34e46115b3d8fd852cca337d7b53453f5f7a475c6c9a54329ae59f1614a",
+      "rc3_sha256": "8b5530cc13c8404b166a2711a63cd95574e2e84089766aa095af6c33de70be1b",
+      "sha256": "7f4f975e25d1a484071a2a5247a1097fafe6dd9fbfdb2e39fb9dbf2bbacab499",
+      "gdn_sha256": "8b5530cc13c8404b166a2711a63cd95574e2e84089766aa095af6c33de70be1b"
+    },
+    {
+      "target": "vllm/models/qwen4_exp/nvidia/model.py",
+      "stock_sha256": "bdc0ea930dadc02328c2bee0b4c9cad048b989612cc76906829728668dcde138",
+      "rc1_sha256": "4aa919306fa987fc303b6ed807c24dd2411b7fd5d0faa35f5b781ce7c9619f84",
+      "rc2_sha256": "2e03b2faa3eacf7bd6cb5b1a081240b7efc586d5eac87144104fc8aea1168dad",
+      "rc3_sha256": "2e03b2faa3eacf7bd6cb5b1a081240b7efc586d5eac87144104fc8aea1168dad",
+      "sha256": "2e03b2faa3eacf7bd6cb5b1a081240b7efc586d5eac87144104fc8aea1168dad",
+      "gdn_sha256": "2e03b2faa3eacf7bd6cb5b1a081240b7efc586d5eac87144104fc8aea1168dad"
+    },
+    {
+      "target": "vllm/models/qwen4_exp/nvidia/mtp.py",
+      "stock_sha256": "35dc7e4b4cf124ce79a7bfc65a5f198c9edc622f1692bf6b24c91486112b7d99",
+      "rc1_sha256": "6a7db22e742c4d4287b17ebc35e38d61b97f04441639d4aea3fddd2392ebe0c3",
+      "rc2_sha256": "6a7db22e742c4d4287b17ebc35e38d61b97f04441639d4aea3fddd2392ebe0c3",
+      "rc3_sha256": "6a7db22e742c4d4287b17ebc35e38d61b97f04441639d4aea3fddd2392ebe0c3",
+      "sha256": "6a7db22e742c4d4287b17ebc35e38d61b97f04441639d4aea3fddd2392ebe0c3",
+      "gdn_sha256": "6a7db22e742c4d4287b17ebc35e38d61b97f04441639d4aea3fddd2392ebe0c3"
+    },
+    {
+      "target": "vllm/models/qwen4_exp/nvidia/ngram_embedding.py",
+      "stock_sha256": "01c2cb7c691c9a8a448e57619fdb97bfe1c3230e7be3c92dd4642d3f7173a499",
+      "rc1_sha256": "a8c5b2a8052966158accd00095daa59f8915d0ca48f2a42e0316c771ce23f47a",
+      "rc2_sha256": "a8c5b2a8052966158accd00095daa59f8915d0ca48f2a42e0316c771ce23f47a",
+      "rc3_sha256": "a8c5b2a8052966158accd00095daa59f8915d0ca48f2a42e0316c771ce23f47a",
+      "sha256": "66f962b63d8780a3a5d5c4bde582edb8d993f7b01f7694581387565a167fe730",
+      "gdn_sha256": "a8c5b2a8052966158accd00095daa59f8915d0ca48f2a42e0316c771ce23f47a"
+    },
+    {
+      "target": "vllm/third_party/flash_linear_attention/ops/fused_recurrent.py",
+      "stock_sha256": "fe6f1311014809040497aa0a623e7fa97f4b3457cdc7ee1f1f8aed21f326f755",
+      "rc1_sha256": "085fa04ef2cabd9604bda3ac5bfc567480bc59a890b78cb9886561285db35036",
+      "rc2_sha256": "085fa04ef2cabd9604bda3ac5bfc567480bc59a890b78cb9886561285db35036",
+      "rc3_sha256": "085fa04ef2cabd9604bda3ac5bfc567480bc59a890b78cb9886561285db35036",
+      "sha256": "085fa04ef2cabd9604bda3ac5bfc567480bc59a890b78cb9886561285db35036",
+      "gdn_sha256": "085fa04ef2cabd9604bda3ac5bfc567480bc59a890b78cb9886561285db35036"
+    },
+    {
+      "target": "vllm/third_party/flash_linear_attention/ops/fused_sigmoid_gating.py",
+      "stock_sha256": "000ab8996af9788fdb8843a6a3b91833e7a14c8acc0e1ea073a536330f64cb6f",
+      "rc1_sha256": "c45f746199067fb3981ca0e9c136a8109a12666d44a39ea5daae03d19c4be132",
+      "rc2_sha256": "c45f746199067fb3981ca0e9c136a8109a12666d44a39ea5daae03d19c4be132",
+      "rc3_sha256": "c45f746199067fb3981ca0e9c136a8109a12666d44a39ea5daae03d19c4be132",
+      "sha256": "c45f746199067fb3981ca0e9c136a8109a12666d44a39ea5daae03d19c4be132",
+      "gdn_sha256": "c45f746199067fb3981ca0e9c136a8109a12666d44a39ea5daae03d19c4be132"
+    },
+    {
+      "target": "vllm/v1/attention/backends/gdn_attn.py",
+      "stock_sha256": "ee05a5f81b17aa169f5690ab0b928ca9696c074604a4bad2e42bd0fa7bbd59c4",
+      "rc1_sha256": "ee05a5f81b17aa169f5690ab0b928ca9696c074604a4bad2e42bd0fa7bbd59c4",
+      "rc2_sha256": "ee05a5f81b17aa169f5690ab0b928ca9696c074604a4bad2e42bd0fa7bbd59c4",
+      "rc3_sha256": "ee05a5f81b17aa169f5690ab0b928ca9696c074604a4bad2e42bd0fa7bbd59c4",
+      "sha256": "0ae67387c712f546fc59dc55bce6b33cb6ba58aa4c5b0051221ae0d958a5f0b5",
+      "gdn_sha256": "0ae67387c712f546fc59dc55bce6b33cb6ba58aa4c5b0051221ae0d958a5f0b5"
+    },
+    {
+      "target": "vllm/v1/core/kv_cache_coordinator.py",
+      "stock_sha256": "7fa4065d19021e77b3424d24e1b088c530ed70b90c5ed9bc52cf4b7581d5fc48",
+      "rc1_sha256": "7494e9f76d4a6b0bb469e80816e4052fb52171bc63b34799c3b9588092bc243e",
+      "rc2_sha256": "7494e9f76d4a6b0bb469e80816e4052fb52171bc63b34799c3b9588092bc243e",
+      "rc3_sha256": "7494e9f76d4a6b0bb469e80816e4052fb52171bc63b34799c3b9588092bc243e",
+      "sha256": "7494e9f76d4a6b0bb469e80816e4052fb52171bc63b34799c3b9588092bc243e",
+      "gdn_sha256": "7494e9f76d4a6b0bb469e80816e4052fb52171bc63b34799c3b9588092bc243e"
+    },
+    {
+      "target": "vllm/v1/core/kv_cache_utils.py",
+      "stock_sha256": "d359221ef91a94f7e570220f083979297c297227c1ad1b8ccdbec76cc24565b7",
+      "rc1_sha256": "816aea33eaa28a15b8d739be602a877aa0be1a8ec83853cdc92412dcdd137b4e",
+      "rc2_sha256": "816aea33eaa28a15b8d739be602a877aa0be1a8ec83853cdc92412dcdd137b4e",
+      "rc3_sha256": "816aea33eaa28a15b8d739be602a877aa0be1a8ec83853cdc92412dcdd137b4e",
+      "sha256": "816aea33eaa28a15b8d739be602a877aa0be1a8ec83853cdc92412dcdd137b4e",
+      "gdn_sha256": "816aea33eaa28a15b8d739be602a877aa0be1a8ec83853cdc92412dcdd137b4e"
+    },
+    {
+      "target": "vllm/v1/core/single_type_kv_cache_manager.py",
+      "stock_sha256": "6ebd4ddb5210d500b52b300dfaf462e2e92f58a4ee0e15691a860549dc086d68",
+      "rc1_sha256": "97a0a4518c757cbe48e0d13d7a1890f48bc0db777004a3d66a8eb9ea73ba2405",
+      "rc2_sha256": "97a0a4518c757cbe48e0d13d7a1890f48bc0db777004a3d66a8eb9ea73ba2405",
+      "rc3_sha256": "97a0a4518c757cbe48e0d13d7a1890f48bc0db777004a3d66a8eb9ea73ba2405",
+      "sha256": "97a0a4518c757cbe48e0d13d7a1890f48bc0db777004a3d66a8eb9ea73ba2405",
+      "gdn_sha256": "97a0a4518c757cbe48e0d13d7a1890f48bc0db777004a3d66a8eb9ea73ba2405"
+    },
+    {
+      "target": "vllm/v1/worker/gpu/model_states/mamba_hybrid.py",
+      "stock_sha256": "6ea89adcb39762b533f0c5b765a66e6f942cbde90208a5d13a758ef86a4ac6f1",
+      "rc1_sha256": "4bb7327578f3d05f99c429171b7ee1215b1faeac23c25e4a6f847543effd3b5a",
+      "rc2_sha256": "4bb7327578f3d05f99c429171b7ee1215b1faeac23c25e4a6f847543effd3b5a",
+      "rc3_sha256": "4bb7327578f3d05f99c429171b7ee1215b1faeac23c25e4a6f847543effd3b5a",
+      "sha256": "8cd9eac0da31add7685ba7f23dfc2dcd7d6d422470fa98281aa73f90d5a8408d",
+      "gdn_sha256": "8c14fe2791c0a1b14b715b43b9e5c00486e9184231d2c234900b92ea904d52c5"
+    },
+    {
+      "target": "vllm/v1/worker/gpu_model_runner.py",
+      "stock_sha256": "95dbd301feae580913938cafe4151da7af2cbd5d3f37fa645fab62a8cd1b54ef",
+      "rc1_sha256": "a2d3709963d463256b8b62ecb5264bce10e1b133d552ab10afdd31f68b42d1b2",
+      "rc2_sha256": "a2d3709963d463256b8b62ecb5264bce10e1b133d552ab10afdd31f68b42d1b2",
+      "rc3_sha256": "a2d3709963d463256b8b62ecb5264bce10e1b133d552ab10afdd31f68b42d1b2",
+      "sha256": "a2d3709963d463256b8b62ecb5264bce10e1b133d552ab10afdd31f68b42d1b2",
+      "gdn_sha256": "a2d3709963d463256b8b62ecb5264bce10e1b133d552ab10afdd31f68b42d1b2"
+    },
+    {
+      "target": "vllm/v1/worker/mamba_utils.py",
+      "stock_sha256": "28c8a9bb07a56e3612e245ccc48cd7f29d85181dbe5e4cf8940c6bcd086df856",
+      "rc1_sha256": "28247ad3828e40ff4de8f17ead4f82b0800d85636fb8678c2f4b240be3ddb071",
+      "rc2_sha256": "28247ad3828e40ff4de8f17ead4f82b0800d85636fb8678c2f4b240be3ddb071",
+      "rc3_sha256": "28247ad3828e40ff4de8f17ead4f82b0800d85636fb8678c2f4b240be3ddb071",
+      "sha256": "b5e30c8ab2343340f478c9c8ea94b9369649c74044cd42ea11b246dc84e11243",
+      "gdn_sha256": "b5e30c8ab2343340f478c9c8ea94b9369649c74044cd42ea11b246dc84e11243"
+    },
+    {
+      "target": "vllm/model_executor/layers/fused_moe/routed_experts.py",
+      "stock_sha256": "29a208f66e35a82b4aa5009e22cc26def816f0d40a4ce0cec5c9e84e49b73d85",
+      "sha256": "e0cd7b59bb8b43103f59674c2332ac8be88154d3511cdf2391930a1cca8c6900",
+      "gdn_sha256": "29a208f66e35a82b4aa5009e22cc26def816f0d40a4ce0cec5c9e84e49b73d85"
+    },
+    {
+      "target": "vllm/models/qwen4_exp/common/qsa_cache.py",
+      "stock_sha256": "f399f1b3599beb790cdace6d9100d372df97c0ddf8f4f4668b5ddf3c9d3f111d",
+      "sha256": "f2e478b9ceb73fe0d10d090996290aaa8a8be210858607dc7d49453f71d60ec5",
+      "gdn_sha256": "f399f1b3599beb790cdace6d9100d372df97c0ddf8f4f4668b5ddf3c9d3f111d"
+    },
+    {
+      "target": "vllm/models/qwen4_exp/nvidia/ple_layer.py",
+      "stock_sha256": "704849dca1a5abaca978dd366e23f27ed327f2ee517a6589f1dfb03602782967",
+      "sha256": "5f77f83ca237f3d2085e9f18dcafaaa2600f7dc40fbe3812bc2d52c1f8665f24",
+      "gdn_sha256": "704849dca1a5abaca978dd366e23f27ed327f2ee517a6589f1dfb03602782967"
+    },
+    {
+      "target": "vllm/v1/attention/backends/mamba_attn.py",
+      "stock_sha256": "85f052e2fcc067efc64be484d0c1fab6a277f7d16e7bc5ca683f919df61be754",
+      "sha256": "e80122bcd732d5cb1cf8ba70e386643dcf0d803eaeccf877a26ffb6ddd82e44f",
+      "gdn_sha256": "85f052e2fcc067efc64be484d0c1fab6a277f7d16e7bc5ca683f919df61be754"
+    },
+    {
+      "target": "vllm/v1/attention/backends/short_conv_attn.py",
+      "stock_sha256": "84fc460ef2fbd09743b069bec0c14b39542af6c2254a403e37a048427e151121",
+      "sha256": "9e6b4beb2088b625f376725d50a8142567126ddc2005d0db49ab035c26cd85a8",
+      "gdn_sha256": "84fc460ef2fbd09743b069bec0c14b39542af6c2254a403e37a048427e151121"
+    },
+    {
+      "target": "vllm/v1/worker/gpu/spec_decode/rejection_sampler.py",
+      "stock_sha256": "f815df94f0a6cb38da07b814b274ea903386a2b0678b6d7083afc43d5f62b502",
+      "sha256": "5314296c680df658abc5bd9bf0b3596080b5c3b863944b5ea8737c24bbfccadb",
+      "gdn_sha256": "f815df94f0a6cb38da07b814b274ea903386a2b0678b6d7083afc43d5f62b502"
+    },
+    {
+      "target": "vllm/v1/worker/gpu_worker.py",
+      "stock_sha256": "fbf373713d8a2cec86c6b86e8c1fb2937a7ea4fbf81f49711bc63041ef2de44f",
+      "sha256": "b18ba66cebada524bc3fccdc363fd9166bc20a54ad54f0ffdf4d6e137af03d08",
+      "gdn_sha256": "fbf373713d8a2cec86c6b86e8c1fb2937a7ea4fbf81f49711bc63041ef2de44f"
+    }
+  ],
+  "base_runtime": "ARC3 e975732 GDN RecoverSSM overlay 52956635dbd1c662d866355945c71668a30870b71d65dbaf3d0c3c9af73e73b8; identical image layers",
+  "dataset_id": "lordhansolo/vllm-main-e975732-arc3",
+  "switch": "VLLM_ARC3_GDN_RECOVERSSM"
+}

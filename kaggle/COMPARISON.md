@@ -21,8 +21,8 @@ For the one-table overview, see [SUMMARY.md](SUMMARY.md).
 Notes
 
 - dfranzen's notebook is this repo's competition notebook; its 499 KB harness patch is cell 2.
-- lordhansolo's harness modules sit under `src/ARC3-Inference/inference/agent/` in its source
-  dataset; Kaggle cannot deep-link nested dataset files, so those links open the dataset page.
+- lordhansolo's harness links point at its source bundle copied into `kaggle/lordhansolo/`,
+  because it has no GitHub repo and Kaggle cannot deep-link nested dataset files.
 - Server links point at the Kaggle dataset that ships each runtime. sirikilohit additionally
   borrows the CUDA 13 toolkit from `keithtyser/qwen38-flash-next-vllm-nvfp4-runtime-v1`.
 - lordhansolo's serving config is not in the notebook. It lives in `setup_commands.json`
