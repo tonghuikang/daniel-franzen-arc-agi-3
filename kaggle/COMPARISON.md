@@ -13,14 +13,17 @@ target a single RTX PRO 6000 (96 GB).
 | Server | [SGLang Pennyroyal v2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal v2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
 | Server context | 139,264 | 147,072 | 69,632 |
 | Harness window | 131,072 | 127,488 | 69,632 |
-| Reply reserve | 12,288 | 512 | 512 + 4,096 |
-| Trim rule | drain 58k blocks, 150-turn cap | soft target 81,536 | watermarks 57k → 45k |
-| Max sequences | 10 | 14 | 16 |
 | Games streaming at once | 10 | 14 | 16 |
 | KV dtype | fp8_e4m3 | fp8_e4m3 | fp8_e4m3 |
 | Pool sizing | mem fraction 0.96 | gpu util 0.98, profiled | mem fraction 0.97 + 48 GB host tier |
 | Linear-attention backend | flashinfer | triton (vLLM) | flashinfer |
 | Peak decode tok/s | 946 | 1,135 | 1,159 |
+| Quantisation | AutoRound W4A16 | NVFP4 + FP8 mixed | AutoRound W4A16 + FP8 PLE |
+| MoE backend | auto, autotuned | vLLM default | flashinfer_cutlass (draft) |
+| Temperature | 0.7 | 0.6 | 0.6 |
+| KV pool (tokens) | 1,011,264 | 1,417,100 | 1,004,288 |
+| Weight load time | 269 s | 240 s + 13 s draft | 215 s + 47 s draft |
+| Offloaded weights | PLE | PLE + embed_tokens | PLE |
 | Speculative | NEXTN 3 steps + FR-Spec 64k map | MTP 3 tokens + 32k draft vocab | NEXTN 3 steps, NVFP4 draft |
 
 ## Overview
@@ -224,7 +227,7 @@ scored competition reruns.
 | KV usage at peak | not logged | 91% | not logged |
 | Prefix cache hit rate | not logged | median 91% | not logged |
 | Job-wide generated tok/s | 588 | 933 | 688 |
-| Weight load time | 269 s | not parsed | 215 s + 47 s draft |
+| Weight load time | 269 s | 240 s + 13 s draft | 215 s + 47 s draft |
 | Demo mean score | 36.56 | 5.28 | 6.89 |
 
 Notes
