@@ -8,9 +8,10 @@ target a single RTX PRO 6000 (96 GB).
 | | dfranzen | lordhansolo | sirikilohit |
 |---|---|---|---|
 | Public LB score | 27.89 | 23.84 | 22.53 |
-| Kaggle | [notebook](https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution) | [notebook](https://www.kaggle.com/code/lordhansolo/arc-agi-3-milestone-2) | [notebook](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit) |
+| Kaggle | [notebook](https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution?scriptVersionId=354090904) | [notebook](https://www.kaggle.com/code/lordhansolo/arc-agi-3-milestone-2?scriptVersionId=353922905) | [notebook](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit?scriptVersionId=354134140) |
 | GitHub | [github](https://github.com/da-fr/arc-agi-3-solution) | not linked | [github](https://github.com/LohitSiriki/arc-agi-3-milestone2-solution) |
 | Server | [SGLang Pennyroyal v2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal v2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
+| KV pool (tokens) | 1,011,264 | 1,417,100 | 1,004,288 |
 | Server context | 139,264 | 147,072 | 69,632 |
 | Harness window | 131,072 | 127,488 | 69,632 |
 | Games streaming at once | 10 | 14 | 16 |
@@ -21,10 +22,11 @@ target a single RTX PRO 6000 (96 GB).
 | Quantisation | AutoRound W4A16 | NVFP4 + FP8 mixed | AutoRound W4A16 + FP8 PLE |
 | MoE backend | auto, autotuned | vLLM default | flashinfer_cutlass (draft) |
 | Temperature | 0.7 | 0.6 | 0.6 |
-| KV pool (tokens) | 1,011,264 | 1,417,100 | 1,004,288 |
-| Weight load time | 269 s | 240 s + 13 s draft | 215 s + 47 s draft |
+| Notebook start to ready | 531 s | 544 s | 615 s |
 | Offloaded weights | PLE | PLE + embed_tokens | PLE |
 | Speculative | NEXTN 3 steps + FR-Spec 64k map | MTP 3 tokens + 32k draft vocab | NEXTN 3 steps, NVFP4 draft |
+| Harness patches | 58k [drain](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L7041) trimming<br><br>priority [admission](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L3219) gate<br><br>image-aware [token](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L4154) counts<br><br>[frame_diff](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L9214) in Python<br><br>[retained](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L9690) functions | checked Python [modules](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source?select=src%2FARC3-Inference%2Finference%2Fagent%2Fpython_workspace.py)<br><br>local [token](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source?select=src%2FARC3-Inference%2Finference%2Fagent%2Ftoken_estimate.py) estimate<br><br>[animation](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source?select=src%2FARC3-Inference%2Finference%2Fagent%2Fanimation.py) summaries<br><br>grid [rendering](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source?select=src%2FARC3-Inference%2Finference%2Fagent%2Fgrid_view.py)<br><br>per-game [metrics](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source?select=src%2FARC3-Inference%2Finference%2Fagent%2Fmetrics_log.py) | Wang/Ludvig harness [port](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v18.0-M90-%28Wang/Ludvig-harness-ported-onto-ours;-serving-unchanged%29)<br><br>context [watermarks](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.7-M84-%28context-watermarks-+-history-retention%29)<br><br>UCB [scheduler](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.7-M72-%28one-pool-UCB-scheduler%29)<br><br>solved-level [memory](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.8-M85-%28solved-level-memory%29)<br><br>token-count [guard](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.3-M79-%28context-guard%29) |
+| Inference patches | low-M BF16 [GEMM](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/build_bundle_pennyroyal.sh#L92)<br><br>spec-state [budget](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/build_bundle_pennyroyal.sh#L171) fix<br><br>Marlin scale [dtype](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/build_bundle_pennyroyal.sh#L248) fix<br><br>prefix-cache [checkpoints](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/patches/patch-sglang-mamba-final-prefill-v2.py)<br><br>[prefetch](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/patches/patch-sglang-prefetch-lookahead.patch) lookahead | align-state [retention](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json)<br><br>MTP weight [prefilter](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json)<br><br>pruned draft [vocabulary](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json)<br><br>SM120 small-M [GEMMs](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_README.md)<br><br>exact CUDA [graphs](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_README.md) 44/52 | KV [budget](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) reclaim<br><br>[prefetch](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) once<br><br>parallel [PLE](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) copy<br><br>Marlin scale [dtype](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) fix<br><br>draft-only MTP [folder](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) |
 
 ## Overview
 
@@ -227,11 +229,17 @@ scored competition reruns.
 | KV usage at peak | not logged | 91% | not logged |
 | Prefix cache hit rate | not logged | median 91% | not logged |
 | Job-wide generated tok/s | 588 | 933 | 688 |
-| Weight load time | 269 s | 240 s + 13 s draft | 215 s + 47 s draft |
+| Notebook start to ready | 531 s | 544 s | 615 s |
+| Server launch to ready | 478 s | 430 s | 536 s |
+| Weight load within that | 269 s | 240 s + 13 s draft | 215 s + 47 s draft |
 | Demo mean score | 36.56 | 5.28 | 6.89 |
 
 Notes
 
+- Time to first request is the kernel-log timestamp of the first successful health or
+  model-list response, counted from notebook start. Before the server launch, dfranzen
+  installs its wheelhouse (53 s), lordhansolo unpacks and overlays the vLLM image (114 s),
+  and sirikilohit unpacks SGLang plus a CUDA toolkit (79 s).
 - SGLang logs one line per decode batch, so the dfranzen and sirikilohit peaks are single-batch
   readings. vLLM logs a 10 s average, so lordhansolo's peak is already smoothed.
 - Job-wide tok/s is total generated tokens over the whole notebook wallclock, including server
