@@ -15,8 +15,8 @@ For the one-table overview, see [SUMMARY.md](SUMMARY.md).
 | Cells (code) | 23 (11) | 10 (9) | 50 (27) |
 | Serving config location | inline, cells 4 / 12 / 16 | dataset bundle | inline, cells 3 / 9 / 11 / 16 |
 | Server | [SGLang Pennyroyal 2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal 2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
-| Quantisation | AutoRound W4A16 | NVFP4 + FP8 mixed | AutoRound W4A16 + FP8 PLE |
-| Speculative decoding | NEXTN, 3 steps (num-draft-tokens 4) | MTP, 3 draft tokens | NEXTN, 3 steps (num-draft-tokens 4) |
+| Model and quant | [Intel/Qwen3.8-Flash-Next-W4A16-AutoRound](https://huggingface.co/Intel/Qwen3.8-Flash-Next-W4A16-AutoRound) [uploaded](https://www.kaggle.com/models/dfranzen/intel-qwen3.8-flash-next-w4a16-autoround) (AutoRound W4A16 + BF16 PLE)<br><br>draft: [albucino/Qwen3.8-Flash-Next-W4A16-FP8PLE](https://huggingface.co/albucino/Qwen3.8-Flash-Next-W4A16-FP8PLE/tree/main/runtime/mtp-int4-g32) [uploaded](https://www.kaggle.com/models/dfranzen/albucino-qwen3-8-flash-next-drafter) (INT4 MTP) | [primitive-ai/Qwen3.8-Flash-Next-mixed-NVFP4-FP8](https://huggingface.co/primitive-ai/Qwen3.8-Flash-Next-mixed-NVFP4-FP8/tree/07915ee79ec217c117e8a57bf2557a4a1418c10f) [uploaded](https://www.kaggle.com/models/lordhansolo/qwen3-8-flash-next-mixed-nvfp4-fp8) (NVFP4 + FP8 mixed + BF16 PLE, NVFP4 MTP head built in) | [Intel/Qwen3.8-Flash-Next-W4A16-AutoRound](https://huggingface.co/Intel/Qwen3.8-Flash-Next-W4A16-AutoRound/tree/4c67bf686b7f7fd386bae6b07ab59e8ff1d5b897) [uploaded](https://www.kaggle.com/models/woochangsim/qwen38-flash-next-w4a16-autoround-4c67bf6) (AutoRound W4A16 + RadixArk FP8 PLE)<br><br>draft: [RadixArk/Qwen3.8-Flash-Next-NVFP4](https://huggingface.co/RadixArk/Qwen3.8-Flash-Next-NVFP4) [uploaded](https://www.kaggle.com/models/keithtyser/qwen3-8-flash-next-nvfp4) (NVFP4 MTP) |
+| Speculative decoding | NEXTN, 3 steps (num-draft-tokens 4), INT4 MTP draft | MTP, 3 draft tokens, built-in NVFP4 MTP head | NEXTN, 3 steps (num-draft-tokens 4), NVFP4 MTP draft |
 
 Notes
 
@@ -71,9 +71,9 @@ Notes
 | Games admitted (competition) | 110 | 14 | 28 |
 | Games streaming at once | 10 | 14 | 16 |
 | Admission control | priority gate | none | UCB slices, 2,400 s |
-| Per-game runtime | 31,920 s shared | 3,918 s | 7,920 s |
+| Per-game runtime | 31,920 s shared | 3,918 s | no cap, ~31k s shared pool |
 | Notebook budget | 32,400 s | 2,100 s (see caveats) | 32,400 s |
-| CUDA graph batch sizes | 1–10, max 10 | up to 56 | default |
+| CUDA graph batch sizes | 1, 2, 4, 7, 8, 9, 10 | 1, 2, 4, 8, 16, 24, 32, 40, 44, 48, 52, 56 tokens | 1–8, 10, 12, 14, 16 |
 | Schedule policy | lpm | async | default |
 | Yield rule per turn | 2,048 generated tokens | 150 s | none |
 | Tool steps per turn | unlimited | unlimited | unlimited |
@@ -95,7 +95,7 @@ Notes
 | Draft KV dtype | fp8_e4m3 | n/a | default |
 | Indexer KV dtype | n/a | fp8 | n/a |
 | SSM state dtype | bf16 | bf16 | bf16 |
-| Mamba cache size | 60 | n/a | 80 |
+| Mamba cache size | 60 | shared with KV pool | 80 |
 | Pool sizing | static 0.96 | util 0.98, profiled | static 0.97 |
 | Pinned KV bytes | none | none (auto) | none |
 | Page / block size | 64 | 128 match unit | 64 |
@@ -103,8 +103,12 @@ Notes
 | Mamba radix strategy | extra_buffer | align via patches | extra_buffer |
 | Host cache tier | none | none | 48 GB |
 | MTP draft cache mode | none | recover SSM | none + patch |
-| Offloaded weights | PLE | PLE + embed_tokens | PLE |
+| Offloaded memory | 95.37 GB<br><br>95.37 GB BF16 PLE | 96.55 GB<br><br>95.37 GB BF16 PLE<br>1.18 GB BF16 embed_tokens | 95.68 GB<br><br>47.68 GB FP8 PLE<br>48 GB hierarchical KV + Mamba cache |
 | KV pool asserted at boot | no | no | ≥ 330k tokens |
+| Model weights on GPU | 73.64 GB<br><br>69.85 GB target<br>3.79 GB draft | 71.94 GB<br><br>target incl. MTP head | 73.57 GB<br><br>69.78 GB target<br>3.79 GB draft |
+| KV + Mamba cache on GPU | 15.94 GB<br><br>11.58 GB target KV<br>0.96 GB draft KV<br>3.40 GB Mamba | 19.69 GB | 16.97 GB<br><br>11.50 GB target KV<br>0.96 GB draft KV<br>4.51 GB Mamba |
+| CUDA graphs on GPU | 1.14 GB<br><br>0.48 GB target verify<br>0.37 GB draft decode<br>0.29 GB draft extend | 0.46 GB | 1.59 GB<br><br>0.65 GB target verify<br>0.61 GB draft decode<br>0.33 GB draft extend |
+| GPU memory left free | 4.25 GB | 1.90 GB | 3.17 GB |
 
 Notes
 
@@ -243,8 +247,8 @@ Notes
 - dfranzen's budget formula (window − reply − 512) and image-token estimate are read from
   this repo's `ARC3-Inference`, which matches the notebook's bundled patch.
 - Scores are the public leaderboard values shown on each Kaggle page on 2026-09-30.
-- No notebook ships saved outputs, so measured KV pool size, cache hit rate and achieved
-  concurrency are not recorded.
+- No notebook ships saved outputs. Measured figures come from the Save & Run kernel logs
+  fetched with `kaggle kernels output`.
 
 ## Sources
 
