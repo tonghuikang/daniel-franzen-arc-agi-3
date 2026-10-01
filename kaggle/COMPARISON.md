@@ -235,9 +235,10 @@ Notes
 
 ## Caveats
 
-- lordhansolo's values come from the latest version of `lordhansolo/taaf-kaggle-source`
-  (2026-09-30 13:11). Its pickled target names a different kernel with a 2,100 s budget, so
-  the published run may have used an earlier bundle. The notebook pins no dataset version.
+- lordhansolo's values come from `lordhansolo/taaf-kaggle-source` version 305, uploaded
+  2026-09-30 13:11:22 UTC, the same minute the linked notebook version started its Save & Run,
+  so it is the bundle attached to that version, which the scored rerun reuses. Its pickled
+  target still names an older kernel slug and a 2,100 s budget.
 - dfranzen's budget formula (window − reply − 512) and image-token estimate are read from
   this repo's `ARC3-Inference`, which matches the notebook's bundled patch.
 - Scores are the public leaderboard values shown on each Kaggle page on 2026-09-30.
