@@ -16,7 +16,7 @@ For the one-table overview, see [SUMMARY.md](SUMMARY.md).
 | Serving config location | inline, cells 4 / 12 / 16 | dataset bundle | inline, cells 3 / 9 / 11 / 16 |
 | Server | [SGLang Pennyroyal 2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal 2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
 | Quantisation | AutoRound W4A16 | NVFP4 + FP8 mixed | AutoRound W4A16 + FP8 PLE |
-| Speculative decoding | NEXTN, 4 draft tokens | MTP, 3 draft tokens | NEXTN, 4 draft tokens |
+| Speculative decoding | NEXTN, 3 steps (num-draft-tokens 4) | MTP, 3 draft tokens | NEXTN, 3 steps (num-draft-tokens 4) |
 
 Notes
 
@@ -39,8 +39,8 @@ Notes
 | Harness context window | 131,072 | 127,488 | 69,632 |
 | Reply reservation | 12,288 + 512 | 512 + 512 | 512 + 512 + 4,096 |
 | Prompt budget before trim | ~118k | ~126k | 65,536 |
-| Trim rule | drain 58k blocks | soft target 81,536 | watermarks 57k → 45k |
-| Assistant-turn cap | 150, drain 30 | stock (30) | lifted |
+| Trim rule | drop down to ~59k (58 Ki drain) | drop down to 81,536 | watermarks 57k → 45k |
+| Assistant-turn cap | 150, drain 30 | none (off when a target is set) | lifted |
 | Headroom, window → server | 8,192 | 19,584 | 0 |
 | Prefill chunk | 8,192 | 2,048 | 4,096 |
 | Max prefill tokens | 16,384 | n/a | n/a |
@@ -55,8 +55,9 @@ Notes
 - dfranzen: window is (116+12)·1024 and server context is (116+12+8)·1024. After hitting
   the budget the harness drains a further 58k of old history so the retained prefix stays
   cache-hot for many requests. Diff, game-over and animation images are also attached.
-- lordhansolo: the 81,536 target comes from `LOCAL_ANALYZER_TARGET_CONTEXT`; its exact rule is
-  inferred from the name only (see caveats).
+- lordhansolo: the 81,536 target comes from `LOCAL_ANALYZER_TARGET_CONTEXT`. Once the local
+  estimate passes ~126k, the harness strips old saved-module catalogs and drops the oldest turns
+  until the estimate is at or below 81,536. Setting a target also disables the 30-turn cap.
 - sirikilohit: M79 caps prompts at 65,536 using exact server token counts; M84 trims from
   57,344 down to 45,056; M74 charges each board image 66 tokens.
 - Worst case is server context × server slot cap.
@@ -117,8 +118,8 @@ Notes
 
 | | dfranzen | lordhansolo | sirikilohit |
 |---|---|---|---|
-| Linear-attention backend | flashinfer | triton (vLLM) | flashinfer |
-| MoE backend | auto, autotuned | vLLM default | flashinfer_cutlass (draft) |
+| Linear-attention backend | flashinfer | flashinfer prefill, triton decode | flashinfer |
+| MoE backend | auto (Marlin for W4A16) | auto (flashinfer_cutlass for NVFP4) | auto (Marlin for W4A16), draft on flashinfer_cutlass |
 | Reasoning kept in history | reasoning_content | preserve_thinking, xhigh | reasoning_content |
 | Temperature | 0.7 | 0.6 | 0.6 |
 | Server watchdog | 1,800 s SGLang | restart script | 3-strike exit |
@@ -138,7 +139,7 @@ Notes
 |---|---|---|---|
 | Harness delivery | git patch applied at setup | forked source in bundle | runtime monkey-patches |
 | Harness patch size | 16 files, +8,405 / −197 | 40 files, +5,246 / −2,337 | 15 patch cells |
-| Largest harness change | tool_agent.py +5,339 | tool_agent.py 2,222 lines | M90 harness port |
+| Largest harness change | tool_agent.py +5,339 | tool_agent.py rewrite, 1,745 lines vs 2,063 stock | M90 harness port |
 | New harness modules | 6 | 11 | 0 (inline) |
 | Server patches | 5 | 32 overlay files | 4 |
 | Server patch delivery | baked into wheelhouse | hash-pinned overlay tar | applied to site-packages at boot |
