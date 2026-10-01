@@ -15,6 +15,7 @@ Here is a comparison ~
 | Model weights on GPU | 73.64 GB (69.85 + 3.79 draft) | 71.94 GB (incl. MTP head) | 73.57 GB (69.78 + 3.79 draft) |
 | KV + Mamba cache on GPU | 15.94 GB | 19.69 GB | 16.97 GB |
 | CUDA graphs on GPU | 1.14 GB | 0.46 GB | 1.59 GB |
+| GPU memory left free | 4.25 GB | 1.90 GB | 3.17 GB |
 | Offloaded weights | PLE | PLE n-gram embedding [table](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/lordhansolo/dataset-taaf-kaggle-source/src/ARC3-Inference/inference/framework/kaggle.py#L1372)<br><br>embed_tokens, the 1.18 GiB input token embedding [table](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/lordhansolo/dataset-taaf-kaggle-source/src/ARC3-Inference/inference/framework/kaggle.py#L1316) | PLE |
 | Server | [SGLang Pennyroyal v2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal v2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
 | MoE backend | auto (Marlin for W4A16) | auto (flashinfer_cutlass for NVFP4) | auto (Marlin for W4A16), draft on flashinfer_cutlass |
