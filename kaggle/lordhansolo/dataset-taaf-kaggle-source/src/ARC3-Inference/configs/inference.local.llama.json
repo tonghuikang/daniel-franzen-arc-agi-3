@@ -1,0 +1,52 @@
+{
+  "shared": {
+    "model_name": "ternary-bonsai-2-27b-pq2-0",
+    "provider": "llama.cpp",
+    "context_window": 91392
+  },
+  "experiments": {
+    "root_dir": "runs_local"
+  },
+  "environment": {
+    "environments_dir": "environment_files",
+    "include_tags": ["official"],
+    "games": [],
+    "max_runtime_minutes": 75
+  },
+  "server" : {
+    "backend": "llama.cpp",
+    "port": 8080,
+    "binary": "builds/llama.cpp-prism/llama-server",
+    "model": "builds/gguf/Ternary-Bonsai-2-27B/Ternary-Bonsai-2-27B-PQ2_0.gguf",
+    "mmproj": "builds/gguf/Ternary-Bonsai-2-27B/Ternary-Bonsai-2-27B-mmproj-Q8_0.gguf",
+    "max_model_len": 108800,
+    "gpu_layers": 99,
+    "parallel": 1,
+    "flash_attention": "on",
+    "cache_type_k": "q8_0",
+    "cache_type_v": "q8_0"
+  },
+  "analyzer": {
+    "app_name": "ARC3 Agent Harness",
+    "target_context": 63104,
+    "max_output": 0,
+    "thinking": true,
+    "reasoning_effort": "xhigh",
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "timeout": 900,
+    "tool_steps": 0,
+    "tool_timeout": 30,
+    "tool_output_tokens": 1024,
+    "yield_seconds": 120,
+    "save_request_logs": false
+  },
+  "viewer": {
+    "port": 8021
+  },
+  "multimodal" : {
+    "context" : "current_grid",
+    "upscale" : 4
+  }
+}

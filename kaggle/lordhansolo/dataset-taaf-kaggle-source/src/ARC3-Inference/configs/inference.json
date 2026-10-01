@@ -1,0 +1,99 @@
+{
+  "shared": {
+    "model_name": "primitive-ai/Qwen3.8-Flash-Next-mixed-NVFP4-FP8",
+    "base_url": "http://127.0.0.1:1234/v1",
+    "provider": "vllm",
+    "context_window": 127488
+  },
+  "experiments": {
+    "root_dir": "/shared/arc_3_results/{username}"
+  },
+  "environment": {
+    "dataset": "",
+    "include_tags": ["official"],
+    "exclude_tags": [],
+    "games": [],
+    "max_steps": null,
+    "max_runtime_minutes": 45,
+    "max_experiment_runtime_minutes": null,
+    "max_experiment_runtime_hours": null,
+    "n_passes": 1,
+    "concurrent_jobs": 14
+  },
+  "deployment": {
+    "target": "inline",
+    "wait": false,
+    "source_repos": ["../tufa-arc-agi-framework"],
+    "slurm": {
+      "gpu": "B200",
+      "gpu_count": 2,
+      "time": "13:00:00",
+      "image": "",
+      "partition": "gpu",
+      "nodelist": "",
+      "start_local_server": true,
+      "extra_sbatch_flags": ["--account=default", "--qos=normal"]
+    }
+  },
+  "server" : {
+    "backend": "vllm",
+    "host": "127.0.0.1",
+    "port": 1234,
+    "tensor_parallel_size": 1,
+    "max_model_len": 147072,
+    "dtype": "bfloat16",
+    "quantization": "compressed-tensors",
+    "gdn_decode_kernel": "triton",
+    "gpu_memory_utilization": 0.98,
+    "kv_cache_dtype": "fp8_e4m3",
+    "indexer_kv_dtype": "fp8",
+    "mamba_ssm_cache_dtype": "bfloat16",
+    "max_num_seqs": 14,
+    "max_num_batched_tokens": 2048,
+    "kv_cache_gib": 0,
+    "mtp_tokens": 3,
+    "draft_vocab": "configs/draft_vocab_32k.json",
+    "trust_remote_code": false,
+    "generation_config": "vllm",
+    "language_model_only": false,
+    "enable_prefix_caching": true,
+    "prefix_match_unit": 128,
+    "prefix_cache_retention_interval": 0,
+    "tool_call_parser": "qwen3_coder",
+    "reasoning_parser": "qwen3",
+    "default_chat_template_kwargs": {
+      "preserve_thinking": true,
+      "reasoning_effort": "xhigh"
+    }
+  },
+  "analyzer": {
+    "app_name": "ARC3 Agent Harness",
+    "target_context": 81536,
+    "max_output": 0,
+    "thinking": true,
+    "reasoning_effort": "xhigh",
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "timeout": 120,
+    "tool_steps": 0,
+    "tool_timeout": 30,
+    "tool_output_tokens": 1024,
+    "yield_seconds": 150,
+    "save_request_logs": false
+  },
+  "chat": {
+    "max_tokens": 2048,
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "thinking": true
+  },
+  "viewer": {
+    "port": 8021
+  },
+  "multimodal" : {
+    "context" : "current_grid",
+    "upscale" : 4
+  }
+}

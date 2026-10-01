@@ -11,7 +11,7 @@ For the one-table overview, see [SUMMARY.md](SUMMARY.md).
 |---|---|---|---|
 | Public LB score (2026-09-30) | 27.89 | 23.84 | 22.53 |
 | Kernel | `arc-agi-3-milestone-2-solution` | `arc-agi-3-milestone-2` | `arc-agi-3-duck-18-1gc-submit` |
-| Local copy | `kaggle/arc-agi-3-milestone-2-solution/` | `kaggle/arc-agi-3-milestone-2/` | `kaggle/arc-agi-3-duck-18-1gc-submit/` |
+| Local copy | `kaggle/dfranzen/` | `kaggle/lordhansolo/` | `kaggle/sirikilohit/` |
 | Cells (code) | 23 (11) | 10 (9) | 50 (27) |
 | Serving config location | inline, cells 4 / 12 / 16 | dataset bundle | inline, cells 3 / 9 / 11 / 16 |
 | Server | [SGLang Pennyroyal 2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal 2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
@@ -250,6 +250,6 @@ Notes
   `vllm-openai-server.log` and `metrics/vllm_server.jsonl`, sirikilohit `sglang-main.log`
 - lordhansolo patch docs: `PATCH_README.md`, `VALIDATION.md`, `PATCH_IDENTITY.json` in `lordhansolo/vllm-main-e975732-arc3`
 - sirikilohit write-up: `LohitSiriki/arc-agi-3-milestone2-solution/WRITEUP.md`
-- `kaggle/arc-agi-3-milestone-2-solution/arc-agi-3-milestone-2-solution.ipynb` cells 0, 4, 12, 16, 20
-- `kaggle/arc-agi-3-milestone-2/arc-agi-3-milestone-2.ipynb` plus `setup_commands.json`, `preamble.txt`, `benchmark_initial.pkl`, `deploy_target.pkl` from `lordhansolo/taaf-kaggle-source`
-- `kaggle/arc-agi-3-duck-18-1gc-submit/arc-agi-3-duck-18-1gc-submit.ipynb` cells 3, 9, 11, 16, 33, 35, 44, 45
+- `kaggle/dfranzen/arc-agi-3-milestone-2-solution.ipynb` cells 0, 4, 12, 16, 20
+- `kaggle/lordhansolo/arc-agi-3-milestone-2.ipynb` plus `setup_commands.json`, `preamble.txt`, `benchmark_initial.pkl`, `deploy_target.pkl` from `lordhansolo/taaf-kaggle-source`
+- `kaggle/sirikilohit/arc-agi-3-duck-18-1gc-submit.ipynb` cells 3, 9, 11, 16, 33, 35, 44, 45
