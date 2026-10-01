@@ -2,7 +2,7 @@ Congratulations to the winners (tentative, to be confirmed by the organizers) of
 
 All three run the Tufa ARC-AGI Framework (TAAF) harness and serve Qwen3.8-Flash-Next.
 
-Here is a comparison of the notebooks (I am still looking through the code and logs, I will update)
+Here is a comparison ~
 
 | | dfranzen | lordhansolo | sirikilohit |
 |---|---|---|---|
