@@ -1,0 +1,26 @@
+{
+  "id": "lordhansolo/arc-agi-3-milestone-2",
+  "id_no": 126593734,
+  "title": "ARC-AGI-3 Milestone 2",
+  "code_file": "arc-agi-3-milestone-2.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": false,
+  "enable_gpu": true,
+  "enable_tpu": false,
+  "enable_internet": false,
+  "keywords": [
+    "gpu"
+  ],
+  "dataset_sources": [
+    "lordhansolo/vllm-main-e975732-arc3",
+    "lordhansolo/taaf-kaggle-source"
+  ],
+  "kernel_sources": [],
+  "competition_sources": [
+    "arc-prize-2026-arc-agi-3"
+  ],
+  "model_sources": [
+    "lordhansolo/qwen3-8-flash-next-mixed-nvfp4-fp8/PyTorch/hf-mixed-mtp-nvfp4/1"
+  ]
+}
