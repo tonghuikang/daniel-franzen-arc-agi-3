@@ -3,31 +3,7 @@
 All three run the Tufa ARC-AGI Framework (TAAF) harness, serve Qwen3.8-Flash-Next, and
 target a single RTX PRO 6000 (96 GB).
 
-## Summary
-
-| | dfranzen | lordhansolo | sirikilohit |
-|---|---|---|---|
-| Public LB score | 27.89 | 23.84 | 22.53 |
-| Kaggle | [notebook](https://www.kaggle.com/code/dfranzen/arc-agi-3-milestone-2-solution?scriptVersionId=354090904) | [notebook](https://www.kaggle.com/code/lordhansolo/arc-agi-3-milestone-2?scriptVersionId=353922905) | [notebook](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit?scriptVersionId=354134140) |
-| GitHub | [github](https://github.com/da-fr/arc-agi-3-solution) | not linked | [github](https://github.com/LohitSiriki/arc-agi-3-milestone2-solution) |
-| Write-up | [writeup](https://github.com/da-fr/arc-agi-3-solution/blob/main/WRITEUP.md) | not published | [writeup](https://github.com/LohitSiriki/arc-agi-3-milestone2-solution/blob/main/WRITEUP.md) |
-| Server | [SGLang Pennyroyal v2.5.3](https://www.kaggle.com/datasets/dfranzen/pennyroyal-v253) | [vLLM 0.29.1rc1 nightly e975732](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3) | [SGLang Pennyroyal v2.5.0](https://www.kaggle.com/datasets/sirikilohit/sglang-penny-build-qwen) |
-| KV pool (tokens) | 1,011,264 | 1,417,100 | 1,004,288 |
-| Context (server / harness) | 139,264 / 131,072 | 147,072 / 127,488 | 69,632 / 69,632 |
-| Games streaming at once | 10 | 14 | 16 |
-| Budget per game | 59k tokens of new context per admission, then re-queued by priority based on actions and tokens spent on the level | 3,918 s fixed per game, 14 games at once, one per server slot, run in batches until all 110 are done | 7,920 s per game, handed out in 2,400 s slices by a UCB scheduler, 28 games sharing 16 slots |
-| KV dtype | fp8_e4m3 | fp8_e4m3 | fp8_e4m3 |
-| Pool sizing | mem fraction 0.96 | gpu util 0.98, profiled | mem fraction 0.97 + 48 GB host tier |
-| Linear-attention backend | flashinfer | triton (vLLM) | flashinfer |
-| Peak decode tok/s | 946 | 1,135 | 1,159 |
-| Quantisation | AutoRound W4A16 | NVFP4 + FP8 mixed | AutoRound W4A16 + FP8 PLE |
-| MoE backend | auto, autotuned | vLLM default | flashinfer_cutlass (draft) |
-| Temperature | 0.7 | 0.6 | 0.6 |
-| Notebook start to ready | 531 s | 544 s | 615 s |
-| Offloaded weights | PLE | PLE + embed_tokens | PLE |
-| Speculative | NEXTN 3 steps + FR-Spec 64k map | MTP 3 tokens + 32k draft vocab | NEXTN 3 steps, NVFP4 draft |
-| Harness patches | trim history in 58k [drain](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L7041) blocks per eviction<br><br>priority [admission](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L3219) gate for 10 streams with tail fade<br><br>calibrated image-aware [token](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/kaggle/arc-agi-3-milestone-2-solution/harness-changes.patch?plain=1#L4154) counts for trimming | tool-agent [rewrite](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source), 2,222 lines of tool_agent.py<br><br>checked per-game Python [modules](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source) tested before swap<br><br>cheap local [token](https://www.kaggle.com/datasets/lordhansolo/taaf-kaggle-source) estimate that drives trimming | Wang sandbox [port](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v18.0-M90-%28Wang/Ludvig-harness-ported-onto-ours;-serving-unchanged%29) with segmentation and prompts<br><br>context [watermarks](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.7-M84-%28context-watermarks-+-history-retention%29) trimming from 57k down to 45k<br><br>solved-level [memory](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.8-M85-%28solved-level-memory%29) pinning rules from cleared levels<br><br>context-limit [raise](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#Patch-cell---v16.3-M79-%28context-guard%29) with exact counts to 65,536 |
-| Inference patches | prefix-cache [checkpoints](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/patches/patch-sglang-mamba-final-prefill-v2.py) keeping sparse Mamba states<br><br>spec-state [budget](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/build_bundle_pennyroyal.sh#L171) fix, no reserve for absent SSM scratch<br><br>low-M BF16 [GEMM](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/build_bundle_pennyroyal.sh#L92) for faster small-batch matmuls<br><br>shard [prefetch](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/patches/patch-sglang-prefetch-lookahead.patch) lookahead, staging the next while loading<br><br>Marlin scale [dtype](https://github.com/tonghuikang/daniel-franzen-arc-agi-3/blob/main/serving/build_bundle_pennyroyal.sh#L248) fix for the BF16 vs FP16 mismatch | align-state [retention](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json) reusing Mamba state across turns<br><br>prompt-tail [state](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json) caching the partial prompt tail<br><br>mixed-checkpoint PLE [safeguard](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json) keeping BF16 PLE unquantized<br><br>pinned-host [embed_tokens](https://www.kaggle.com/datasets/lordhansolo/vllm-main-e975732-arc3?select=PATCH_IDENTITY.json) keeping the table in host RAM | KV [budget](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) reclaim dropping draft SSM scratch reservation<br><br>draft-only MTP [folder](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) loading 3 shards instead of 206<br><br>parallel [PLE](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) row copy on 16 threads at load<br><br>[prefetch](https://www.kaggle.com/code/sirikilohit/arc-agi-3-duck-18-1gc-submit#4.-Import-the-bundled-source-and-boot-SGLang) once, no repeated checkpoint prefetch |
+For the one-table overview, see [SUMMARY.md](SUMMARY.md).
 
 ## Overview
 
